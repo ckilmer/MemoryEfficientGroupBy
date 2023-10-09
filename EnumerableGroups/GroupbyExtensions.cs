@@ -38,10 +38,11 @@
 
                 while (enumerator.MoveNext())
                 {
-                    if (!key.Equals(enumerator.Current))
+                    if (!key.Equals(keySelector(enumerator.Current)))
                     {
                         yield break;
                     }
+                    yield return enumerator.Current;
                 }
 
                 endOfEnumerator = true;

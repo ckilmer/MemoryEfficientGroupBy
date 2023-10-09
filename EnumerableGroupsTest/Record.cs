@@ -12,5 +12,5 @@ namespace GroupByExtensionsTest
     /// </summary>
     /// <param name="Key"></param>
     /// <param name="Value"></param>
-    internal record Record(String Key, String Value);
+    internal record Record(int Key, int Value);
 }

@@ -4,30 +4,56 @@ namespace GroupByExtensionsTest
 {
     public static class Program
     {
+        private static int numGroups = 100000;
+        private static int sizeOfGroup = 100;
+
         static void Main()
         {
-            IEnumerable<Record> records = new List<Record>
+            testMemoryEfficient();
+            testCurrent();
+        }
+
+        static void testMemoryEfficient()
+        {
+            var records = GetRecords();
+
+            var groups = records.GroupByKeySorted(r => r.Key);
+
+            AccessRecords(groups);
+        }
+
+        static void testCurrent()
+        {
+            var records = GetRecords();
+
+            var groups = records.GroupBy(r => r.Key);
+
+            AccessRecords(groups);
+        }
+
+        private static IEnumerable<Record> GetRecords()
+        {
+            for(int i = 0; i < numGroups; i++)
             {
-                new Record("1", "hi"),
-                new Record("1", "hi2"),
-                new Record("2", "hi"),
-                new Record("1", "fail")
-            };
-
-            IEnumerable<IGrouping<String, Record>> groups = records.GroupByKeySorted(r => r.Key);
-
-            //We only load each record in memory individually here,
-            //while still being able to perform group operations.
-
-            //This is super powerful for performing complicated
-            //query operations while being memory efficient
-            foreach(var group in groups)
-            {
-                Console.WriteLine($"Key: {group.Key}");
-                foreach(var record in group)
+                for(int j = 0; j < sizeOfGroup; j++)
                 {
-                    Console.WriteLine(record);
+                    yield return new Record(i, j);
                 }
+            }
+        }
+
+        /// <summary>
+        /// This could be any method that only needs a subset of records in memory at a time.
+        /// Such as writing to a file, or performing some operation only at group level.
+        /// </summary>
+        /// <typeparam name="TKey"></typeparam>
+        /// <typeparam name="TElement"></typeparam>
+        /// <param name="groups"></param>
+        private static void AccessRecords<TKey>(IEnumerable<IGrouping<TKey, Record>> groups)
+        {
+            foreach (var group in groups)
+            {
+                Console.WriteLine(group.Select(r => r.Value).Sum());
             }
         }
     }
